@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <title>notes</title>
+    <style>
+        h1{
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 50px;
+        }
+    </style>
+</head>
+<body onload="loadNotes()">
+
+    <h1>Notes Application</h1>
+    
+    <div class="container">
+
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Add note</h3>
+                <div class="form-group">
+                    <label for="">Contents</label>
+                    <textarea id="contents" rows="10" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <button onclick="addNote()" class="btn btn-success">Save</button>
+                    <button onclick="cancel()" class="btn btn-danger">Cancel</button>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <h3>Notes list</h3>
+                <ul id="notes" class="list-group">
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        function loadNotes() {
+            $.ajax({
+                method: 'GET',
+                url: 'http://172.16.20.12:3000/notes',
+                success: (response) => {
+                    if (response['status'] === 'success') {
+                        let items = ''
+                        const notes = response['data']
+                        for (let index = 0; index < notes.length; index++) {
+                            const note = notes[index]
+                            items += `<li class="list-group-item">${note['contents']}</li>`
+                        }
+
+                        $('#notes').html(items)
+                    }
+                },
+                error: (error) => {
+                    alert('error')
+                    console.log(error)
+                }
+            })
+        }
+
+        function cancel() {
+            $('#contents').text('')
+        }
+
+        function addNote() {
+            const contents = $('#contents').text()
+            if (contents.length === 0) {
+                alert('Please enter contents')
+            } else {
+                const data = {
+                    contents: contents
+                }
+
+                $.ajax({
+                    method: 'POST',
+                    url: 'http://172.16.20.12:3000/notes',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+                    success: (response) => {
+                        if (response['status'] === 'success') {
+                            let items = ''
+                            const notes = response['data']
+                            for (let index = 0; index < notes.length; index++) {
+                                const note = notes[index]
+                                items += `<li class="list-group-item">${note['contents']}</li>`
+                            }
+
+                            $('#notes').html(items)
+                        }
+                    },
+                    error: (error) => {
+                        alert('error')
+                        console.log(error)
+                    }
+                })
+            }
+            
+        }
+
+        
+    </script>
+
+</body>
+</html>
